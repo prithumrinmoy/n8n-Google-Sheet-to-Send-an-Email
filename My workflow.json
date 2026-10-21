@@ -1,0 +1,148 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyX",
+              "value": 10,
+              "unit": "minutes"
+            }
+          ]
+        },
+        "documentId": {
+          "__rl": true,
+          "value": "1ym3dH81_XeEV5eo-X_eLOv3PKleHJFaJXrHbZXgkRdk",
+          "mode": "list",
+          "cachedResultName": "practice n8n",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ym3dH81_XeEV5eo-X_eLOv3PKleHJFaJXrHbZXgkRdk/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ym3dH81_XeEV5eo-X_eLOv3PKleHJFaJXrHbZXgkRdk/edit#gid=0"
+        },
+        "options": {}
+      },
+      "id": "4093f0a4-b9cf-489d-980a-e967ed5a2a11",
+      "name": "Google Sheets Trigger",
+      "type": "n8n-nodes-base.googleSheetsTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "credentials": {
+        "googleSheetsTriggerOAuth2Api": {
+          "id": "Jj2S0BxS0Vs5Gi4u",
+          "name": "Google Sheets Trigger account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-3.5-flash",
+          "mode": "list",
+          "cachedResultName": "Gemini 3.5 Flash"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=You are a professional customer support assistant. Your job is to read customer problems and provide a clear, concise summary to the customer support team.\n\nSummarize the following support ticket clearly in 2-3 short sentences using simple words.\n\nGuidelines for the summary:\n- Mention the customer's name.\n- Explain the core issue in simple terms.\n- State the priority level and the current status.\n\nInput Data:\nTicket ID: {{ $json['Ticket ID'] }}\nCustomer Name: {{ $json['Customer Name'] }}\nIssue Description: {{ $json['Issue Description'] }}\nPriority: {{ $json.Priority }}\nStatus: {{ $json.Status }}\n\nOutput Requirement:\nYou must return ONLY a valid JSON object containing exactly two keys: \"Email Subject\" and \"Email Body\". Do not include any markdown formatting (such as ```json), conversational text, or explanations. \n\nUse this exact format:\n{\n  \"Email Subject\": \"[{{ $json.Priority }}] Ticket {{ $json['Ticket ID'] }} - Short 3-4 word issue title\",\n  \"Email Body\": \"[Your 2-3 sentence summary following the guidelines above]\"\n}"
+            }
+          ]
+        },
+        "jsonOutput": true,
+        "builtInTools": {},
+        "options": {}
+      },
+      "id": "9f03a58d-5f02-4720-82d1-4eed6f4b33a1",
+      "name": "Message a model",
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1.2,
+      "position": [
+        240,
+        0
+      ],
+      "executeOnce": true,
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000,
+      "credentials": {
+        "googlePalmApi": {
+          "id": "U9ZoghGPrjshYFf0",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "mrprithumrinmoy@gmail.com",
+        "subject": "={{ JSON.parse($json.content.parts[0].text)[\"Email Subject\"] }}",
+        "message": "={{ JSON.parse($json.content.parts[0].text)[\"Email Body\"] }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "e828786a-d26e-4407-b419-5a08793d0190",
+      "name": "Send a message",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        608,
+        0
+      ],
+      "webhookId": "9c522e69-abdb-4f18-9db9-94320d2bb133",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "xSf0MfXosEcIb1ca",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Google Sheets Trigger": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "b2b71aa5-4f31-41db-8dde-0586cca33edb",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "96a620cbbb8387c6db3789ebf8c83fcbfaf258f0a6590da60f0051d0b6771819"
+  },
+  "nodeGroups": [],
+  "id": "FhO3JxQhYMfxqArM",
+  "tags": []
+}
